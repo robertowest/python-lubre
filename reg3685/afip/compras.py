@@ -3,7 +3,7 @@ from unidecode import unidecode
 
 class Compra:
     linea_iva = []
-    
+
     def __init__(self, fecha, comprob, terminal, numero,
                        cuit, nombre,
                        neto, no_grab, iva21, iva10, iva27, p_ibb, p_iva, itc, total, c_ali):
@@ -56,7 +56,9 @@ class Compra:
         return "|".join(linea)
 
     def recalcular(self):
-        # import pdb; pdb.set_trace()
+        # if self.__numero == 16217:
+        #     import pdb; pdb.set_trace()
+
         neto = self.__neto
         iva = self.__iva21 + self.__iva10 + self.__iva27
         otros = self.__p_ibb + self.__p_iva + self.__itc
@@ -138,7 +140,7 @@ class Compra:
 
     def __define_linea_iva(self):
         global linea_iva
-        
+
         linea_iva = [
             self.comprobante(),
             self.terminal(),
@@ -150,7 +152,7 @@ class Compra:
     def linea_iva10(self):
         global linea_iva
         self.__define_linea_iva()
-        
+
         if self.__iva10 != 0:
             linea2 = linea_iva
             linea2.append(self.valor_iva(self.__iva10, .105, 15))

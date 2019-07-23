@@ -53,8 +53,8 @@ class Venta:
         return "|".join(linea)
 
     def recalcular(self):
-        if self.__numero == 82:
-            import pdb; pdb.set_trace()
+        # if self.__numero == 29:
+        #     import pdb; pdb.set_trace()
 
         neto = self.__gravado
         no_grav = self.__no_grav
@@ -96,7 +96,8 @@ class Venta:
             'NDEA': '002',
             'NDEB': '007',
             'NDEC': '012',
-            'LPRA': '060',
+            # 'LPRA': '060',
+            'LPRA': '003',
         }
         return switcher.get(self.__comprob, "FACA")
 
@@ -128,13 +129,11 @@ class Venta:
         neto = round(iva / porcentaje, 2)
         return format(neto, '.2f').replace(".", "").rjust(largo, '0')
 
-    def es_valido(self):
-        if self.__iva == 0:
-            return False
-        return True
-
-    def iva(self):
+    def iva21(self):
         return self.__iva != 0
+
+    def iva10(self):
+        return self.__otro_iva != 0
 
     def __define_linea_iva(self):
         global linea_iva
@@ -145,14 +144,24 @@ class Venta:
             self.numero()
         ]
 
-    def linea_iva(self):
+    def linea_iva21(self):
         global linea_iva
         self.__define_linea_iva()
 
-        if self.__iva != 0:
+        if self.iva21():
             linea2 = linea_iva
-            # linea2.append(self.valor_iva(self.__iva, .21, 15))
-            linea2.append(self.formato_numero(self.__gravado, 15))
+            linea2.append(self.valor_iva(self.__iva, .21, 15))
             linea2.append("0005")
             linea2.append(self.formato_numero(self.__iva, 15))
+            return "|".join(linea2)
+
+    def linea_iva10(self):
+        global linea_iva
+        self.__define_linea_iva()
+
+        if self.iva10():
+            linea2 = linea_iva
+            linea2.append(self.valor_iva(self.__otro_iva, .105, 15))
+            linea2.append("0004")
+            linea2.append(self.formato_numero(self.__otro_iva, 15))
             return "|".join(linea2)

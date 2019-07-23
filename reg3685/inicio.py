@@ -32,7 +32,7 @@ def iva_compras():
           "neto, no_grab, iva21, iva10, iva27, p_ibb, p_iva, itc, total, c_ali " \
           "FROM citi_compras_v " \
           "WHERE anio = {} AND mes = {}".format(args.a, args.m)
-          # "WHERE idfacprovedor = 145574"
+          # "WHERE idfacprovedor = 82126"
 
     cursor = conn.cursor()
     for row in cursor.execute(SQL).itermap():
@@ -61,16 +61,16 @@ def iva_compras():
                 if args.pantalla:
                     print(compra.linea_iva21())
                 else:
-                    file2.write(compra.linea_iva21.replace("|", "") + "\n")
+                    file2.write(compra.linea_iva21().replace("|", "") + "\n")
 
             if compra.iva27():
                 if args.pantalla:
                     print(compra.linea_iva27())
                 else:
-                    file2.write(compra.linea_iva27.replace("|", "") + "\n")
+                    file2.write(compra.linea_iva27().replace("|", "") + "\n")
 
         except:
-            print("Error al procesar la factura de compras Nº %s" % row["idfacprovedor"])
+            print("Error al procesar la factura de compras Nº %s (%s)" % (row["idfacprovedor"], row["numero"]))
 
     file1.close()
     file2.close()
@@ -78,14 +78,13 @@ def iva_compras():
 def iva_ventas():
     global conn
     desde = date(args.a, args.m, 1)
-    hasta = date(args.a, args.m,
-                 calendar.monthrange(args.a, args.m)[1])
+    hasta = date(args.a, args.m, calendar.monthrange(args.a, args.m)[1])
 
     SQL = "SELECT idfactura, fecha, tipocomprob, letra, terminal, numero, c_iva, cuit, nombre, " \
           "gravado, no_grav, iva, otro_iva, ii, p_ibb, p_iva, total " \
           "FROM citi_ventas_v " \
           "WHERE fecha >= '{}' AND FECHA <= '{}'".format(desde, hasta)
-    # "WHERE idfactura = 81981"
+    # "WHERE IDFACTURA=82993"
 
     file1 = open(args.ruta + "/03-Ventas.txt", "w")
     file2 = open(args.ruta + "/04-Ventas-ALI.txt", "w")
@@ -98,22 +97,29 @@ def iva_ventas():
                       row["p_ibb"], row["p_iva"], row["total"])
 
         try:
-            if venta.es_valido():
-                # factura de venta
-                if args.pantalla:
-                    print(venta)
-                else:
-                    file1.write(str(venta).replace("|", "") + "\n")
+            # factura de venta
+            if args.pantalla:
+                print(venta)
+            else:
+                file1.write(str(venta).replace("|", "") + "\n")
 
-                # información de alícuotas
+            # información de alícuotas
+            if venta.iva21():
                 if args.pantalla:
-                    print(venta.linea_iva())
+                    print(venta.linea_iva21())
                 else:
-                    file2.write(venta.linea_iva().replace("|", "") + "\n")
+                    file2.write(venta.linea_iva21().replace("|", "") + "\n")
+
+            if venta.iva10():
+                if args.pantalla:
+                    print(venta.linea_iva10())
+                else:
+                    file2.write(venta.linea_iva10().replace("|", "") + "\n")
+
 
         except:
             print("Error al procesar la factura de ventas Nº %s" % row["idfactura"])
-            
+
     file1.close()
     file2.close()
 
